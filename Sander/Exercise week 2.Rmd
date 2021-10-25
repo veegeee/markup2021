@@ -1,0 +1,83 @@
+---
+title: "Exercise week 2"
+author: "Sander"
+date: "25-10-2021"
+output: html_document
+---
+
+# Squid game bridge, but only 1 player
+Imagine a bridge composed of 18 pairs of glass tiles. Each pair consists of one glass tile that cannot break and one glass tile that breaks if you only touch it. A fun game could be to make people cross the bridge. In order to cross the player has to jump from tile to tile. If the player chooses the right tiles he wins everything and if he does not he loses all. What is the probability that a player succeeds and how can this be estimated?
+
+# Simulation
+In order to estimate the probability of crossing the bridge a simulation will be done. First a bridge is constructed randomly. The tile that does not break is either the left or the right tile. In order to lay the tiles zeroes and ones are generated. A zero means that the tile that does not break is the left tile and an one means that the tile that does not break is the right tile. I compare values randomly sampled from the uniform distribution to a cut off value of 0.5. By doing so I randomly sample a path that leads to the other side, where left and right have an equal probability of being sampled. A different number of paths can be sampled to estimate the probability. The numbers 10,000, 100,000 and 1,000,000 will be used.
+
+```{r}
+set.seed(196)
+the_bridge<-ifelse(runif(18)<0.5, 1, 0)
+ten_thousand_samples<-rep(0,10000)
+hundred_thousand_samples<-rep(0,100000)
+million_samples<-rep(0,1000000)
+for(i in 1:10000){
+  path_i<-ifelse(runif(18)<0.5, 1, 0)
+  path_i_against_bridge<-path_i == the_bridge
+  if(sum(path_i_against_bridge)==18){ten_thousand_samples[i]<-1}else{ten_thousand_samples[i]<-0}
+}
+
+for(i in 1:100000){
+  path_i<-ifelse(runif(18)<0.5, 1, 0)
+  path_i_against_bridge<-path_i == the_bridge
+  if(sum(path_i_against_bridge)==18){hundred_thousand_samples[i]<-1}else{hundred_thousand_samples[i]<-0}
+}
+
+for(i in 1:1000000){
+  path_i<-ifelse(runif(18)<0.5, 1, 0)
+  path_i_against_bridge<-path_i == the_bridge
+  if(sum(path_i_against_bridge)==18){million_samples[i]<-1}else{million_samples[i]<-0}
+}
+
+prob_tenthousand_it<-sum(ten_thousand_samples)/10000
+prob_hundredthousand_it<-sum(hundred_thousand_samples)/100000
+prob_million_it<-sum(million_samples)/1000000
+list(Probability_10000 = prob_tenthousand_it, Probability_100000 = prob_hundredthousand_it, Probability_1000000 = prob_million_it)
+```
+
+# Comparison
+The probability can also exactly be computed by hand. The probability equals 1 divided by the number of possible paths which equals 2^18. Calculating this gives `r 1/2^18`. The probability estimated through the simulation with 1,000,000 iterations comes very close to the true probability. When 10,000 or 100,000 iterations are used for the simulation the probability is estimated to be zero. This makes sense because the number of paths equals 2^18. As a consequence, the path that leads to the other side is not always sampled when 100,000 iterations are used and is almost never sampled if 10,000 iterations are used. More specifically, the probability of following the correct part is to small for 10,000 or 100,000 iterations to be sufficient for estimation.
+
+# Replication
+The analysis is replicated using a different seed.
+```{r}
+set.seed(197)
+the_bridge<-ifelse(runif(18)<0.5, 1, 0)
+ten_thousand_samples<-rep(0,10000)
+hundred_thousand_samples<-rep(0,100000)
+million_samples<-rep(0,1000000)
+for(i in 1:10000){
+  path_i<-ifelse(runif(18)<0.5, 1, 0)
+  path_i_against_bridge<-path_i == the_bridge
+  if(sum(path_i_against_bridge)==18){ten_thousand_samples[i]<-1}else{ten_thousand_samples[i]<-0}
+}
+
+for(i in 1:100000){
+  path_i<-ifelse(runif(18)<0.5, 1, 0)
+  path_i_against_bridge<-path_i == the_bridge
+  if(sum(path_i_against_bridge)==18){hundred_thousand_samples[i]<-1}else{hundred_thousand_samples[i]<-0}
+}
+
+for(i in 1:1000000){
+  path_i<-ifelse(runif(18)<0.5, 1, 0)
+  path_i_against_bridge<-path_i == the_bridge
+  if(sum(path_i_against_bridge)==18){million_samples[i]<-1}else{million_samples[i]<-0}
+}
+
+prob_tenthousand_it<-sum(ten_thousand_samples)/10000
+prob_hundredthousand_it<-sum(hundred_thousand_samples)/100000
+prob_million_it<-sum(million_samples)/1000000
+list(Probability_10000 = prob_tenthousand_it, Probability_100000 = prob_hundredthousand_it, Probability_1000000 = prob_million_it)
+```
+Replication of the analysis with a different seed clearly does not yield the same result. If 1,000,000 iterations are used it is still possible that the correct path is not sampled. So a million iterations, just as 10,000 and 100,000 iterations, is not enough. 
+
+```{r}
+sessionInfo()
+```
+
